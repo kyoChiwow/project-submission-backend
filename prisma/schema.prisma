@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client"
   output   = "../generated/prisma"
@@ -12,17 +7,42 @@ datasource db {
   provider = "postgresql"
 }
 
-model User { 
-  id    Int     @id @default(autoincrement()) 
-  email String  @unique
-  name  String?
-  posts Post[]
-} 
-model Post { 
-  id        Int     @id @default(autoincrement()) 
-  title     String
-  content   String?
-  published Boolean @default(false) 
-  author    User    @relation(fields: [authorId], references: [id]) 
-  authorId  Int
-} 
+enum Role {
+  STUDENT
+  MENTOR
+}
+
+enum ProjectStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model User {
+  id           Int          @id @default(autoincrement())
+  name         String
+  email        String       @unique
+  passwordHash String
+  role         Role         @default(STUDENT)
+  project      Project?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  @@index([role])
+}
+
+model Project {
+  id          Int           @id @default(autoincrement())
+  name        String
+  repoUrl     String        @unique
+  liveUrl     String
+  description String        @db.VarChar(2000)
+  status      ProjectStatus @default(PENDING)
+  reviewNote  String?       @db.VarChar(1000)
+  submittedAt DateTime      @default(now())
+  reviewedAt  DateTime?
+  studentId   Int           @unique
+  student     User          @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@index([status, submittedAt])
+}
