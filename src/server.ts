@@ -8,10 +8,14 @@ const server = http.createServer(app);
 
 async function start() {
   if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) {
-    throw new Error("Set JWT_SECRET to a random value with at least 32 characters");
+    throw new Error(
+      "Set JWT_SECRET to a random value with at least 32 characters",
+    );
   }
   await prisma.$connect();
-  server.listen(port, () => console.log(`API listening on http://localhost:${port}`));
+  server.listen(port, () =>
+    console.log(`API listening on http://localhost:${port}`),
+  );
 }
 async function shutdown(signal: string) {
   console.log(`${signal} received; shutting down`);
